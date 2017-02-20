@@ -4,7 +4,7 @@ package com.rengwuxian.rxjavasamples.module.cache_6.data;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.rengwuxian.rxjavasamples.App;
+import com.rengwuxian.rxjavasamples.app.App;
 import com.rengwuxian.rxjavasamples.model.Item;
 
 import java.io.File;
@@ -21,7 +21,7 @@ public class Database {
 
     private static Database INSTANCE;
 
-    File dataFile = new File(App.getInstance().getFilesDir(), DATA_FILE_NAME);
+    File dataFile = new File(App.getInstance().getApplication().getFilesDir(), DATA_FILE_NAME);
     Gson gson = new Gson();
 
     private Database() {

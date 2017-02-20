@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,7 +15,8 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.rengwuxian.rxjavasamples.BaseFragment;
+import com.rengwuxian.rxjavasamples.app.BaseFragment;
+import com.rengwuxian.rxjavasamples.app.BaseLazyFragment;
 import com.rengwuxian.rxjavasamples.network.Network;
 import com.rengwuxian.rxjavasamples.R;
 import com.rengwuxian.rxjavasamples.adapter.ZhuangbiListAdapter;
@@ -29,10 +31,11 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class ElementaryFragment extends BaseFragment {
+public class ElementaryFragment extends BaseLazyFragment {
     @Bind(R.id.swipeRefreshLayout) SwipeRefreshLayout swipeRefreshLayout;
     @Bind(R.id.gridRv) RecyclerView gridRv;
-
+//    @Bind(R.id.searchRb1)AppCompatRadioButton searchRb1;
+    private String type = "可爱";
     ZhuangbiListAdapter adapter = new ZhuangbiListAdapter();
     Observer<List<ZhuangbiImage>> observer = new Observer<List<ZhuangbiImage>>() {
         @Override
@@ -58,17 +61,12 @@ public class ElementaryFragment extends BaseFragment {
             unsubscribe();
             adapter.setImages(null);
             swipeRefreshLayout.setRefreshing(true);
-            search(searchRb.getText().toString());
+            type = searchRb.getText().toString();
+            prepareFetchData(true);
         }
     }
 
-    private void search(String key) {
-        subscription = Network.getZhuangbiApi()
-                .search(key)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(observer);
-    }
+
 
     @Nullable
     @Override
@@ -80,17 +78,18 @@ public class ElementaryFragment extends BaseFragment {
         gridRv.setAdapter(adapter);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-
         return view;
     }
 
     @Override
-    protected int getDialogRes() {
-        return R.layout.dialog_elementary;
+    public void fetchData() {
+        search(type);
     }
-
-    @Override
-    protected int getTitleRes() {
-        return R.string.title_elementary;
+    private void search(String key) {
+        subscription = Network.getZhuangbiApi()
+                .search(key)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(observer);
     }
 }

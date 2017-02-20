@@ -14,9 +14,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rengwuxian.rxjavasamples.BaseFragment;
 import com.rengwuxian.rxjavasamples.R;
 import com.rengwuxian.rxjavasamples.adapter.ItemListAdapter;
+import com.rengwuxian.rxjavasamples.app.BaseFragment;
 import com.rengwuxian.rxjavasamples.model.Item;
 import com.rengwuxian.rxjavasamples.module.cache_6.data.Data;
 
@@ -88,13 +88,5 @@ public class CacheFragment extends BaseFragment {
         return view;
     }
 
-    @Override
-    protected int getDialogRes() {
-        return R.layout.dialog_cache;
-    }
 
-    @Override
-    protected int getTitleRes() {
-        return R.string.title_cache;
-    }
 }

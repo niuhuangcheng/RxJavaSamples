@@ -15,12 +15,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rengwuxian.rxjavasamples.BaseFragment;
+import com.rengwuxian.rxjavasamples.app.BaseFragment;
+import com.rengwuxian.rxjavasamples.app.BaseLazyFragment;
 import com.rengwuxian.rxjavasamples.network.Network;
 import com.rengwuxian.rxjavasamples.R;
 import com.rengwuxian.rxjavasamples.adapter.ItemListAdapter;
 import com.rengwuxian.rxjavasamples.model.Item;
-import com.rengwuxian.rxjavasamples.util.GankBeautyResultToItemsMapper;
+import com.rengwuxian.rxjavasamples.utils.GankBeautyResultToItemsMapper;
 
 import java.util.List;
 
@@ -31,8 +32,8 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MapFragment extends BaseFragment {
-    private int page = 0;
+public class MapFragment extends BaseLazyFragment {
+    private int page = 1;
 
     @Bind(R.id.pageTv) TextView pageTv;
     @Bind(R.id.previousPageBt) Button previousPageBt;
@@ -61,7 +62,8 @@ public class MapFragment extends BaseFragment {
 
     @OnClick(R.id.previousPageBt)
     void previousPage() {
-        loadPage(--page);
+        --page;
+        prepareFetchData(true);
         if (page == 1) {
             previousPageBt.setEnabled(false);
         }
@@ -69,22 +71,14 @@ public class MapFragment extends BaseFragment {
 
     @OnClick(R.id.nextPageBt)
     void nextPage() {
-        loadPage(++page);
+       ++page;
+        prepareFetchData(true);
         if (page == 2) {
             previousPageBt.setEnabled(true);
         }
     }
 
-    private void loadPage(int page) {
-        swipeRefreshLayout.setRefreshing(true);
-        unsubscribe();
-        subscription = Network.getGankApi()
-                .getBeauties(10, page)
-                .map(GankBeautyResultToItemsMapper.getInstance())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(observer);
-    }
+
 
     @Nullable
     @Override
@@ -100,12 +94,18 @@ public class MapFragment extends BaseFragment {
     }
 
     @Override
-    protected int getDialogRes() {
-        return R.layout.dialog_map;
+    public void fetchData() {
+        loadPage(page);
     }
 
-    @Override
-    protected int getTitleRes() {
-        return R.string.title_map;
+    private void loadPage(int page) {
+        swipeRefreshLayout.setRefreshing(true);
+        unsubscribe();
+        subscription = Network.getGankApi()
+                .getBeauties(10, page)
+                .map(GankBeautyResultToItemsMapper.getInstance())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(observer);
     }
 }

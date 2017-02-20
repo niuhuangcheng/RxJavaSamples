@@ -1,5 +1,42 @@
 apply plugin: 'com.android.application'
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd")
+}
 
+boolean isInJeknins() {
+    Map<String, String> map =  System.getenv()
+
+    if(map == null) {
+        return false
+    }
+    String str = map.get("Path")
+    if(str != null) {
+        //it's windows
+        return false;
+    }
+    else{
+        str = ""
+        Iterator it = map.iterator();
+        while(it.hasNext()) {
+            str += it.next();
+        }
+        if(str.contains("jenkins")){
+            return true
+        }else{
+            return false;
+        }
+    }
+    return false
+}
+String getJenkinsBuild() {
+    boolean  flag = isInJeknins();
+    if(flag){
+        return System.getenv().get("BUILD_NUMBER")
+    }else{
+        return "0"
+    }
+
+}
 android {
     compileSdkVersion 24
     buildToolsVersion "23.0.3"
@@ -9,12 +46,33 @@ android {
         minSdkVersion 15
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
+        //不允许删除修改，用于build no
+        buildConfigField 'int','VERSION_BUILD_NO',"${getJenkinsBuild()}"
+
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            def fileName
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                //这里修改apk文件名
+                if (variant.buildType.name.equals('release')) {
+                    fileName = "android_${defaultConfig.versionName}_${releaseTime() }.apk"
+                } else if (variant.buildType.name.equals('debug')) {
+                    fileName = "android_${defaultConfig.versionName}_${releaseTime() }_debug.apk"
+                }
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
         }
     }
 }
@@ -37,4 +95,17 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
     compile 'io.reactivex:rxjava:1.0.10'
+    // 若使用annotation需要单独引用,对于tinker的其他库都无需再引用
+    compile 'com.android.support:multidex:1.0.0'
+    provided("com.tencent.tinker:tinker-android-anno:1.7.7")
+    compile("com.tinkerpatch.sdk:tinkerpatch-android-sdk:1.1.3")
+
 }
+//productFlavors {
+//
+//    AJINLI_JINLIYH01 { manifestPlaceholders = ([CHANNEL_VALUE: "jinliyh01"]) }
+//
+//
+//}
+
+apply from: 'tinkerpatch.gradle'

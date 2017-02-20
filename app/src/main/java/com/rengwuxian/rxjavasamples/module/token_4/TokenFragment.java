@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rengwuxian.rxjavasamples.BaseFragment;
+import com.rengwuxian.rxjavasamples.app.BaseFragment;
 import com.rengwuxian.rxjavasamples.network.Network;
 import com.rengwuxian.rxjavasamples.R;
 import com.rengwuxian.rxjavasamples.network.api.FakeApi;
@@ -72,13 +72,5 @@ public class TokenFragment extends BaseFragment {
         return view;
     }
 
-    @Override
-    protected int getDialogRes() {
-        return R.layout.dialog_token;
-    }
 
-    @Override
-    protected int getTitleRes() {
-        return R.string.title_token;
-    }
 }

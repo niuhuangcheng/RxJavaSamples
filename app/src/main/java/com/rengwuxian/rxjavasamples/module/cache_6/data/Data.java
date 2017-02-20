@@ -5,11 +5,11 @@ package com.rengwuxian.rxjavasamples.module.cache_6.data;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 
-import com.rengwuxian.rxjavasamples.App;
+import com.rengwuxian.rxjavasamples.app.App;
 import com.rengwuxian.rxjavasamples.network.Network;
 import com.rengwuxian.rxjavasamples.R;
 import com.rengwuxian.rxjavasamples.model.Item;
-import com.rengwuxian.rxjavasamples.util.GankBeautyResultToItemsMapper;
+import com.rengwuxian.rxjavasamples.utils.GankBeautyResultToItemsMapper;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class Data {
             default:
                 dataSourceTextRes = R.string.data_source_network;
         }
-        return App.getInstance().getString(dataSourceTextRes);
+        return App.getInstance().getApplication().getString(dataSourceTextRes);
     }
 
     public void loadFromNetwork() {
