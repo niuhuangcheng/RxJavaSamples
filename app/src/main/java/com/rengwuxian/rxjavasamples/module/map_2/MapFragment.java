@@ -29,6 +29,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observer;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -44,10 +45,12 @@ public class MapFragment extends BaseLazyFragment {
     Observer<List<Item>> observer = new Observer<List<Item>>() {
         @Override
         public void onCompleted() {
+            showContentView();
         }
 
         @Override
         public void onError(Throwable e) {
+            showError();
             swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(getActivity(), R.string.loading_failed, Toast.LENGTH_SHORT).show();
         }
@@ -83,14 +86,17 @@ public class MapFragment extends BaseLazyFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_map, container, false);
-        ButterKnife.bind(this, view);
+        View root = super.onCreateView(inflater,container,savedInstanceState);
+        setContent(R.layout.fragment_map);
+        //View view = inflater.inflate(R.layout.fragment_map, container, false);
+
+        ButterKnife.bind(this, root);
 
         gridRv.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         gridRv.setAdapter(adapter);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-        return view;
+        return root;
     }
 
     @Override
@@ -100,12 +106,12 @@ public class MapFragment extends BaseLazyFragment {
 
     private void loadPage(int page) {
         swipeRefreshLayout.setRefreshing(true);
-        unsubscribe();
-        subscription = Network.getGankApi()
+        Subscription subscription = Network.getGankApi()
                 .getBeauties(10, page)
                 .map(GankBeautyResultToItemsMapper.getInstance())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
+        addSubscription(subscription);
     }
 }

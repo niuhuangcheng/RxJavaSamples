@@ -26,6 +26,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observer;
+import rx.Subscription;
 
 public class CacheFragment extends BaseFragment {
     @Bind(R.id.loadingTimeTv) TextView loadingTimeTv;
@@ -52,8 +53,7 @@ public class CacheFragment extends BaseFragment {
     void load() {
         swipeRefreshLayout.setRefreshing(true);
         startingTime = System.currentTimeMillis();
-        unsubscribe();
-        subscription = Data.getInstance()
+        Subscription subscription = Data.getInstance()
                 .subscribeData(new Observer<List<Item>>() {
                     @Override
                     public void onCompleted() {
@@ -74,18 +74,22 @@ public class CacheFragment extends BaseFragment {
                         adapter.setItems(items);
                     }
                 });
+        addSubscription(subscription);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_cache, container, false);
-        ButterKnife.bind(this, view);
+        View root = super.onCreateView(inflater,container,savedInstanceState);
+        setContent(R.layout.fragment_cache);
+
+        //View view = inflater.inflate(R.layout.fragment_cache, container, false);
+        ButterKnife.bind(this, root);
         cacheRv.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         cacheRv.setAdapter(adapter);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-        return view;
+        return root;
     }
 
 

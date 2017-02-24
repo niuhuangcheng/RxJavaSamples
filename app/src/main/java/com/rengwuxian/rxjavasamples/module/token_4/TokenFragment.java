@@ -23,6 +23,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -36,9 +37,8 @@ public class TokenFragment extends BaseFragment {
     @OnClick(R.id.requestBt)
     void upload() {
         swipeRefreshLayout.setRefreshing(true);
-        unsubscribe();
         final FakeApi fakeApi = Network.getFakeApi();
-        subscription = fakeApi.getFakeToken("fake_auth_code")
+        Subscription subscription = fakeApi.getFakeToken("fake_auth_code")
                 .flatMap(new Func1<FakeToken, Observable<FakeThing>>() {
                     @Override
                     public Observable<FakeThing> call(FakeToken fakeToken) {
@@ -60,16 +60,19 @@ public class TokenFragment extends BaseFragment {
                         Toast.makeText(getActivity(), R.string.loading_failed, Toast.LENGTH_SHORT).show();
                     }
                 });
+        addSubscription(subscription);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_token, container, false);
-        ButterKnife.bind(this, view);
+        View root = super.onCreateView(inflater,container,savedInstanceState);
+        setContent(R.layout.fragment_token);
+        //View view = inflater.inflate(R.layout.fragment_token, container, false);
+        ButterKnife.bind(this, root);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-        return view;
+        return root;
     }
 
 

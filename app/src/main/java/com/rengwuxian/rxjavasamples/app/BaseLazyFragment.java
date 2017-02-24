@@ -35,6 +35,9 @@ public abstract class BaseLazyFragment extends BaseFragment {
     }
     public boolean prepareFetchData(boolean forceUpdate){
         if(isViewInitialted && isVisiableToUser &&(!isDataInitialted || forceUpdate)){
+           if(!isDataInitialted){//首次加载
+               showLoading();
+           }
             fetchData();
             isDataInitialted = true;
             return true;

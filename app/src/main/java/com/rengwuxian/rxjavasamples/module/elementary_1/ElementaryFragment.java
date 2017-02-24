@@ -4,6 +4,7 @@ package com.rengwuxian.rxjavasamples.module.elementary_1;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatRadioButton;
@@ -28,6 +29,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import rx.Observer;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -40,12 +42,14 @@ public class ElementaryFragment extends BaseLazyFragment {
     Observer<List<ZhuangbiImage>> observer = new Observer<List<ZhuangbiImage>>() {
         @Override
         public void onCompleted() {
+            showContentView();
         }
 
         @Override
         public void onError(Throwable e) {
             swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(getActivity(), R.string.loading_failed, Toast.LENGTH_SHORT).show();
+            showError();
         }
 
         @Override
@@ -58,7 +62,6 @@ public class ElementaryFragment extends BaseLazyFragment {
     @OnCheckedChanged({R.id.searchRb1, R.id.searchRb2, R.id.searchRb3, R.id.searchRb4})
     void onTagChecked(RadioButton searchRb, boolean checked) {
         if (checked) {
-            unsubscribe();
             adapter.setImages(null);
             swipeRefreshLayout.setRefreshing(true);
             type = searchRb.getText().toString();
@@ -71,14 +74,16 @@ public class ElementaryFragment extends BaseLazyFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_elementary, container, false);
-        ButterKnife.bind(this, view);
-
+       View root =  super.onCreateView(inflater,container,savedInstanceState);
+        //View view = inflater.inflate(R.layout.fragment_elementary, container, false);
+        setContent(R.layout.fragment_elementary);
+        ButterKnife.bind(this, root);
         gridRv.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         gridRv.setAdapter(adapter);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-        return view;
+        Toast.makeText(getContext(),"pid->"+ Process.myPid(),Toast.LENGTH_SHORT).show();
+        return root;
     }
 
     @Override
@@ -86,10 +91,12 @@ public class ElementaryFragment extends BaseLazyFragment {
         search(type);
     }
     private void search(String key) {
-        subscription = Network.getZhuangbiApi()
+         Subscription subscription = Network.getZhuangbiApi()
                 .search(key)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
+         addSubscription(subscription);
+
     }
 }

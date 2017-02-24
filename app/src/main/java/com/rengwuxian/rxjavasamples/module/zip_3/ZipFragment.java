@@ -30,6 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
@@ -42,10 +43,12 @@ public class ZipFragment extends BaseLazyFragment {
     Observer<List<Item>> observer = new Observer<List<Item>>() {
         @Override
         public void onCompleted() {
+            showContentView();
         }
 
         @Override
         public void onError(Throwable e) {
+            showError();
             swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(getActivity(), R.string.loading_failed, Toast.LENGTH_SHORT).show();
         }
@@ -65,21 +68,22 @@ public class ZipFragment extends BaseLazyFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_zip, container, false);
-        ButterKnife.bind(this, view);
+        View root = super.onCreateView(inflater,container,savedInstanceState);
+        setContent(R.layout.fragment_zip);
+       // View view = inflater.inflate(R.layout.fragment_zip, container, false);
+        ButterKnife.bind(this, root);
 
         gridRv.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         gridRv.setAdapter(adapter);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-        return view;
+        return root;
     }
 
     @Override
     public void fetchData() {
         swipeRefreshLayout.setRefreshing(true);
-        unsubscribe();
-        subscription = Observable.zip(Network.getGankApi().getBeauties(200, 1).map(GankBeautyResultToItemsMapper.getInstance()),
+        Subscription subscription = Observable.zip(Network.getGankApi().getBeauties(200, 1).map(GankBeautyResultToItemsMapper.getInstance()),
                 Network.getZhuangbiApi().search("装逼"),
                 new Func2<List<Item>, List<ZhuangbiImage>, List<Item>>() {
                     @Override
@@ -100,5 +104,6 @@ public class ZipFragment extends BaseLazyFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
+        addSubscription(subscription);
     }
 }

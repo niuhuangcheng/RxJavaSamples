@@ -23,6 +23,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -45,9 +46,8 @@ public class TokenAdvancedFragment extends BaseFragment {
     void upload() {
         tokenUpdated = false;
         swipeRefreshLayout.setRefreshing(true);
-        unsubscribe();
         final FakeApi fakeApi = Network.getFakeApi();
-        subscription = Observable.just(null)
+        Subscription subscription = Observable.just(null)
                 .flatMap(new Func1<Object, Observable<FakeThing>>() {
                     @Override
                     public Observable<FakeThing> call(Object o) {
@@ -97,16 +97,19 @@ public class TokenAdvancedFragment extends BaseFragment {
                         Toast.makeText(getActivity(), R.string.loading_failed, Toast.LENGTH_SHORT).show();
                     }
                 });
+        addSubscription(subscription);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_token_advanced, container, false);
-        ButterKnife.bind(this, view);
+        View root = super.onCreateView(inflater,container,savedInstanceState);
+        setContent(R.layout.fragment_token_advanced);
+        //View view = inflater.inflate(R.layout.fragment_token_advanced, container, false);
+        ButterKnife.bind(this, root);
         swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW);
         swipeRefreshLayout.setEnabled(false);
-        return view;
+        return root;
     }
 
 
